@@ -17,6 +17,7 @@ sys.path.insert(0, str(project_root))
 
 from src.core.text_processor import TextProcessor
 from src.core.tts_engine import TTSEngine
+from src.main import TextToVideoApp
 from config.settings import settings
 
 
@@ -76,10 +77,8 @@ st.markdown("""
 
 
 # Initialize session state
-if 'processor' not in st.session_state:
-    st.session_state.processor = TextProcessor()
-if 'tts_engine' not in st.session_state:
-    st.session_state.tts_engine = TTSEngine()
+if 'app' not in st.session_state:
+    st.session_state.app = TextToVideoApp()
 if 'processing' not in st.session_state:
     st.session_state.processing = False
 if 'generated_video' not in st.session_state:
@@ -110,7 +109,7 @@ def main():
         )
         
         # TTS Engine selection
-        available_engines = st.session_state.tts_engine.get_available_engines()
+        available_engines = st.session_state.app.tts_engine.get_available_engines()
         tts_engine = st.selectbox(
             "🎤 TTS Engine",
             options=available_engines,
@@ -231,59 +230,31 @@ def generate_video(text: str, language: str, tts_engine: str, voice_style: str, 
             progress_bar = st.progress(0)
             status_text = st.empty()
             
-            # Step 1: Process text
-            status_text.text("📝 Processing text...")
-            progress_bar.progress(20)
+            # Step 1: Generate video using the main app
+            status_text.text("🎬 Generating video...")
+            progress_bar.progress(10)
             
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             
-            processed_text = loop.run_until_complete(
-                st.session_state.processor.process_text(text, language)
-            )
-            
-            # Step 2: Generate audio
-            status_text.text("🎤 Generating speech...")
-            progress_bar.progress(40)
-            
-            audio_data = loop.run_until_complete(
-                st.session_state.tts_engine.generate_speech(
-                    processed_text.cleaned_text,
-                    language,
-                    voice_style,
-                    tts_engine
+            # Generate video with integrated pipeline
+            video_path = loop.run_until_complete(
+                st.session_state.app.generate_video(
+                    text=text,
+                    language=language,
+                    voice_style=voice_style,
+                    aspect_ratio=aspect_ratio,
+                    quality=quality
                 )
             )
-            
-            # Step 3: Save audio for preview
-            status_text.text("💾 Saving audio...")
-            progress_bar.progress(60)
-            
-            output_dir = settings.OUTPUT_DIR
-            audio_path = output_dir / f"generated_audio_{int(time.time())}.wav"
-            
-            audio_file_path = loop.run_until_complete(
-                st.session_state.tts_engine.save_audio(audio_data, str(audio_path))
-            )
-            
-            # Step 4: Animation (placeholder for now)
-            status_text.text("🎭 Creating animations...")
-            progress_bar.progress(80)
-            time.sleep(2)  # Simulate animation processing
-            
-            # Step 5: Video rendering (placeholder for now)
-            status_text.text("🎬 Rendering video...")
-            progress_bar.progress(90)
-            time.sleep(2)  # Simulate video rendering
             
             progress_bar.progress(100)
             status_text.text("✅ Video generation complete!")
             
             # Store results
             st.session_state.generated_video = {
-                "audio_path": audio_file_path,
-                "processed_text": processed_text,
-                "audio_data": audio_data,
+                "video_path": video_path,
+                "text": text,
                 "settings": {
                     "language": language,
                     "tts_engine": tts_engine,
@@ -322,19 +293,57 @@ def show_video_result():
     </div>
     """, unsafe_allow_html=True)
     
-    # Audio preview
-    st.subheader("🎤 Audio Preview")
-    if os.path.exists(result["audio_path"]):
-        st.audio(result["audio_path"])
+    # Video preview
+    st.subheader("� Video Preview")
+    if os.path.exists(result["video_path"]):
+        # Display video
+        st.video(result["video_path"])
         
-        # Download button for audio
-        with open(result["audio_path"], "rb") as audio_file:
+        # Download button for video
+        with open(result["video_path"], "rb") as video_file:
             st.download_button(
-                label="📥 Download Audio",
-                data=audio_file.read(),
-                file_name=f"generated_audio.wav",
-                mime="audio/wav"
+                label="📥 Download Video",
+                data=video_file.read(),
+                file_name=f"generated_video.mp4",
+                mime="video/mp4"
             )
+    else:
+        st.warning("Video file not found. Only audio was generated.")
+        
+        # Check if it's actually an audio file
+        if result["video_path"].endswith(('.wav', '.mp3', '.ogg')):
+            st.subheader("🎤 Audio Preview")
+            st.audio(result["video_path"])
+            
+            # Download button for audio
+            with open(result["video_path"], "rb") as audio_file:
+                st.download_button(
+                    label="📥 Download Audio",
+                    data=audio_file.read(),
+                    file_name=f"generated_audio.wav",
+                    mime="audio/wav"
+                )
+    
+    # Generation info
+    st.subheader("📊 Generation Info")
+    
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Text Length", f"{len(result['text'])} chars")
+    with col2:
+        st.metric("Language", result["settings"]["language"].upper())
+    with col3:
+        st.metric("Quality", result["settings"]["quality"])
+    
+    # Settings used
+    with st.expander("⚙️ Generation Settings"):
+        settings_used = result["settings"]
+        st.json(settings_used)
+    
+    # Generate new video button
+    if st.button("🔄 Generate Another Video"):
+        st.session_state.generated_video = None
+        st.experimental_rerun()
     
     # Text analysis results
     st.subheader("📊 Text Analysis")

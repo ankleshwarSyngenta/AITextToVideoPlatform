@@ -34,7 +34,7 @@ class TextProcessor:
     
     def __init__(self):
         self.supported_languages = ["en", "hi"]
-        self._load_nlp_models()
+        self.nlp_models = {"en": None, "hi": None}  # Initialize nlp_models
         self._setup_emotion_keywords()
         self._setup_animation_triggers()
     
@@ -208,14 +208,9 @@ class TextProcessor:
     
     def _segment_sentences(self, text: str, language: str) -> List[str]:
         """Segment text into sentences"""
-        if language == "en" and self.nlp_models["en"]:
-            # Use spaCy for English
-            doc = self.nlp_models["en"](text)
-            return [sent.text.strip() for sent in doc.sents]
-        else:
-            # Basic sentence segmentation for other languages
-            sentences = re.split(r'[.!?]+', text)
-            return [s.strip() for s in sentences if s.strip()]
+        # Basic sentence segmentation
+        sentences = re.split(r'[.!?]+', text)
+        return [s.strip() for s in sentences if s.strip()]
     
     def _extract_words(self, text: str, language: str) -> List[str]:
         """Extract words from text"""
