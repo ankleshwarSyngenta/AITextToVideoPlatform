@@ -1,0 +1,152 @@
+# AI Text-to-Video Platform Configuration
+
+# Application Settings
+app:
+  name: "AI Text-to-Video Platform"
+  version: "1.0.0"
+  debug: false
+  
+# Server Configuration
+server:
+  host: "0.0.0.0"
+  api_port: 8000
+  web_port: 8501
+  workers: 4
+  
+# Text-to-Speech Configuration
+tts:
+  default_engine: "gtts"
+  engines:
+    gtts:
+      enabled: true
+      cache_enabled: true
+      languages:
+        en:
+          tld: "com"
+          slow: false
+        hi:
+          tld: "co.in"
+          slow: false
+    
+    coqui:
+      enabled: true
+      model_name: "tts_models/multilingual/multi-dataset/your_tts"
+      cache_enabled: true
+      
+    pyttsx3:
+      enabled: true
+      rate: 150
+      volume: 0.9
+
+# Animation Configuration
+animation:
+  blender:
+    auto_detect: true
+    custom_path: null
+    
+  character:
+    model_name: "bull_character"
+    default_animations:
+      - "idle"
+      - "talking"
+      - "gesturing"
+      - "thinking"
+      
+  settings:
+    frame_rate: 24
+    lip_sync_enabled: true
+    lip_sync_threshold: 0.1
+    gesture_intensity: 0.8
+    breathing_animation: true
+    eye_blinking: true
+
+# Video Rendering Configuration
+video:
+  default_quality: "1080p"
+  default_aspect_ratio: "16:9"
+  
+  qualities:
+    720p:
+      width: 1280
+      height: 720
+      bitrate: "2M"
+      fps: 24
+      
+    1080p:
+      width: 1920
+      height: 1080
+      bitrate: "5M"
+      fps: 24
+      
+    4k:
+      width: 3840
+      height: 2160
+      bitrate: "15M"
+      fps: 24
+  
+  output:
+    format: "mp4"
+    codec: "h264"
+    audio_codec: "aac"
+    
+# Audio Configuration
+audio:
+  sample_rate: 44100
+  bit_depth: 16
+  channels: 1
+  format: "wav"
+  
+# Performance Settings
+performance:
+  max_workers: 4
+  memory_limit_gb: 8
+  enable_gpu: true
+  batch_processing: true
+  
+# Cache Configuration
+cache:
+  enabled: true
+  ttl_hours: 24
+  max_size_gb: 5
+  cleanup_on_startup: false
+  
+# Logging Configuration
+logging:
+  level: "INFO"
+  file_max_size: "10 MB"
+  file_retention: "10 days"
+  console_output: true
+  
+# File Upload Limits
+upload:
+  max_text_length: 10000
+  max_file_size_mb: 10
+  allowed_formats: ["txt", "docx", "pdf"]
+  
+# Language Support
+languages:
+  supported:
+    - code: "en"
+      name: "English"
+      tts_available: true
+    - code: "hi"
+      name: "Hindi"
+      tts_available: true
+      
+# Background Processing
+background:
+  enabled: false
+  broker: "redis://localhost:6379/0"
+  result_backend: "redis://localhost:6379/0"
+  
+# Security Settings
+security:
+  enable_cors: true
+  allowed_origins: ["*"]
+  max_request_size: "100MB"
+  
+# Development Settings
+development:
+  auto_reload: true
+  debug_mode: false
+  profiling_enabled: false

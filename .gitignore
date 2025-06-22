@@ -1,0 +1,82 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+data/temp/
+data/cache/
+data/output/*.mp4
+data/output/*.wav
+data/output/*.mp3
+logs/
+*.log
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Blender temp files
+*.blend1
+*.blend2
+
+# Audio/Video files (except samples)
+*.mp4
+*.mp3
+*.wav
+*.avi
+*.mov
+!assets/audio/samples/*
+
+# Large model files
+*.pkl
+*.model
+*.bin
+models/
+checkpoints/
